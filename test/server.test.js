@@ -34,5 +34,33 @@ describe('server tests', () => {
       });
 
     });
+
+    it('should return requested file', done => {
+      /*
+        1. check if path of the request file goes to files directory
+        2. check if user don't try to request subfolder
+        3. if file doesn't exist server returns error
+        4. if there is some issues with reading the file return error
+        5. return file to client if everything is ok
+       */
+
+        const content = fs.readFileSync('files/index.js', {encoding: 'utf-8'});
+
+        request('http://localhost:3000', (err, response, body) => {
+          if (err) return done(err);
+
+          // content.path.includes();
+          // done();
+        });
+    })
   });
+
+  describe('POST', () => {
+    it('should receive file', done => {
+      /*
+        1.
+
+       */
+    });
+  })
 });
