@@ -35,24 +35,65 @@ describe('server tests', () => {
 
     });
 
+
+    /*
+      1. check if path of the request contains "/files" directory
+      2. check if user don't try to request subfolder
+      3. if file doesn't exist server returns error
+      4. if there is some issues with reading the file return error
+      5. return file to client if everything is ok
+     */
+
+
+    it('should return error if path has nested subfolders', done => {
+        request('http://localhost:3000/files/subfolder/index.js', (err, response, body) => {
+            if (err) return done(err);
+
+            assert.equal(response.statusCode, 400);
+            assert.equal(body, 'Nested paths are not allowed');
+
+            done();
+        });
+    });
+
+
+    it('should return error if path has ".." symbols', done => {
+        request('http://localhost:3000/../files/index.js', (err, response, body) => {
+            if (err) return done(err);
+
+            assert.equal(response.statusCode, 400);
+            assert.equal(body, 'Nested paths are not allowed');
+
+            done();
+        });
+    });
+
+
+    it('should return error if file is too big', done => {
+        request('http://localhost:3000/files/big.png', (err, response, body) => {
+            if (err) return done(err);
+
+            assert.equal(response.statusCode, 413);
+            assert.equal(body, 'File is too big!');
+
+            done();
+        });
+    });
+
+
     it('should return requested file', done => {
-      /*
-        1. check if path of the request file goes to files directory
-        2. check if user don't try to request subfolder
-        3. if file doesn't exist server returns error
-        4. if there is some issues with reading the file return error
-        5. return file to client if everything is ok
-       */
-
-        const content = fs.readFileSync('files/index.js', {encoding: 'utf-8'});
-
-        request('http://localhost:3000', (err, response, body) => {
+        request('http://localhost:3000/files/index.js', (err, response, body) => {
           if (err) return done(err);
 
-          // content.path.includes();
-          // done();
+            // const content = fs.readFileSync(response.pathname, {encoding: 'utf-8'});
+            //
+            // assert.isTrue(content);
+
+          done();
         });
-    })
+    });
+
+
   });
 
   describe('POST', () => {
@@ -61,6 +102,8 @@ describe('server tests', () => {
         1.
 
        */
+
+        done();
     });
   })
 });
