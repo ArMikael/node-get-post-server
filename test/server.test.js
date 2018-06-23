@@ -69,18 +69,6 @@ describe('server tests', () => {
     });
 
 
-    it('should return error if file is too big', done => {
-        request('http://localhost:3000/files/big.png', (err, response, body) => {
-            if (err) return done(err);
-
-            assert.equal(response.statusCode, 413);
-            assert.equal(body, 'File is too big!');
-
-            done();
-        });
-    });
-
-
     it('should return requested file', done => {
         request('http://localhost:3000/files/index.js', (err, response, body) => {
           if (err) return done(err);
@@ -97,13 +85,14 @@ describe('server tests', () => {
   });
 
   describe('POST', () => {
-    it('should receive file', done => {
-      /*
-        1.
+      it('should return error if file is too big', done => {
+          fs.createReadStream('files/big.png')
+              .pipe(request.post('http://localhost:3000', (err, response, body) => {
+                  assert.equal(response.statusCode, 413);
+                  assert.equal(body, 'File is too big!');
 
-       */
-
-        done();
-    });
+                  done();
+              }));
+      });
   })
 });

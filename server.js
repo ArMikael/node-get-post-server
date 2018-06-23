@@ -30,6 +30,7 @@ module.exports = http.createServer((req, res) => {
   if (req.method === 'POST') {
 
     if (!filename) {
+      debugger;
       res.statusCode = 404;
       res.end('File not found');
     }
