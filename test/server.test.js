@@ -36,11 +36,10 @@ describe('server tests', () => {
     });
 
     /*
-      1. check if path of the request contains "/files" directory
-      2. check if user don't try to request subfolder
-      3. if file doesn't exist server returns error
+      1. should return requested file if the path is correct
+      2. if file doesn't exist server returns error
+      3. check if user don't try to request subfolder
       4. if there is some issues with reading the file return error
-      5. return file to client if everything is ok
      */
 
     it('should return requested file if the path is correct', done => {
@@ -52,7 +51,16 @@ describe('server tests', () => {
         });
     });
 
-    it('should return error if path has nested subfolders', done => {
+  it('should return error if file doesn\'t exist', done => {
+      request('http://localhost:3000/index.html', (err, response, body) => {
+          assert.equal(response.statusCode, 404);
+          assert.equal(body, 'Not found');
+
+          done();
+      });
+  });
+
+    it('should return error if the path has nested subfolders', done => {
         request('http://localhost:3000/files/subfolder/index.js', (err, response, body) => {
             if (err) return done(err);
 
@@ -64,7 +72,7 @@ describe('server tests', () => {
     });
 
 
-    it('should return error if path has ".." symbols', done => {
+    it('should return error if the path has ".." symbols', done => {
         request('http://localhost:3000/../files/index.js', (err, response, body) => {
             if (err) return done(err);
 
