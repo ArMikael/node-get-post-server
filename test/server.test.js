@@ -112,13 +112,25 @@ describe('server tests', () => {
 
         it('should return error if file is too big', done => {
             request.get('http://localhost:3000/big.png')
-                .pipe(request.post('http://localhost:3000/big.png', (err, response, body) => {
-                    // assert.equal(err, 'ddd');
+                .on('response', function(response) {
+                    console.log(response.statusCode); // 200
+                })
+                .pipe(request.post('http://localhost:3000/big2.png', (err, response, body) => {
+                    // console.log(response);
                     assert.equal(response.statusCode, 413);
                     assert.equal(body, 'File is too big!');
 
                     done();
                 }));
+
+
+            after(done => {
+                fs.unlink('files/big2.png', err => {
+                    if (!err) {
+                        done();
+                    }
+                });
+            });
         });
   })
 });
