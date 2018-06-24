@@ -145,23 +145,42 @@ describe('server tests', () => {
     });
 
     describe('DELETE', () => {
-        before(done => {
-            request.get('http://localhost:3000/index.js')
-                .pipe(request.post('http://localhost:3000/index2.js', err => {
-                    if (!err) {
-                        done();
-                    }
-            }));
-        });
+        // before(done => {
+        //     // request.get('http://localhost:3000/index.js')
+        //     //     .pipe(request.post('http://localhost:3000/index2.js', err => {
+        //     //         if (!err) {
+        //     //             done();
+        //     //         }
+        //     // }));
+        //
+        //     const file = fs.readFileSync('files/index.js', {encoding: 'utf-8'});
+        //     console.log(file.toString());
+        //
+        //     fs.writeFileSync('files/index2.js', file, (res) => {
+        //         console.log(res);
+        //         done();
+        //     });
+        // });
 
         it('should remove file', done => {
-            request.delete('http://localhost:3000/index2.js', (err, response, body) => {
-                console.log('err', err);
-                console.log('body', body);
-                console.log('response.statusCode', response.statusCode);
+            request.delete('http://localhost:3000/index.js', (err, response, body) => {
+                assert.equal(body, 'Ok');
+                assert.equal(response.statusCode, 200);
 
                 done();
             });
         });
+
+
+
+        it('should return error if file doesn\'t exist', done => {
+            request.delete('http://localhost:3000/index3.js', (err, response, body) => {
+                assert.equal(response.statusCode, 404);
+
+                done();
+            });
+        });
+
+
     });
 });
