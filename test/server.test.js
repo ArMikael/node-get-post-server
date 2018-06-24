@@ -35,7 +35,6 @@ describe('server tests', () => {
 
     });
 
-
     /*
       1. check if path of the request contains "/files" directory
       2. check if user don't try to request subfolder
@@ -44,6 +43,14 @@ describe('server tests', () => {
       5. return file to client if everything is ok
      */
 
+    it('should return requested file if the path is correct', done => {
+        request('http://localhost:3000/index.js', (err, response, body) => {
+            assert.equal(response.statusCode, 200);
+            assert.equal(body, 'console.log(\'hello world\');');
+
+            done();
+        });
+    });
 
     it('should return error if path has nested subfolders', done => {
         request('http://localhost:3000/files/subfolder/index.js', (err, response, body) => {
@@ -67,20 +74,6 @@ describe('server tests', () => {
             done();
         });
     });
-
-
-    it('should return requested file', done => {
-        request('http://localhost:3000/files/index.js', (err, response, body) => {
-          if (err) return done(err);
-
-            // const content = fs.readFileSync(response.pathname, {encoding: 'utf-8'});
-            //
-            // assert.isTrue(content);
-
-          done();
-        });
-    });
-
 
   });
 
