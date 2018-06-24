@@ -2,6 +2,8 @@ const assert = require('assert');
 const server = require('../server');
 const request = require('request');
 const fs = require('fs');
+const config = require('config');
+const path = require('path');
 
 describe('server tests', () => {
   before(done => {
@@ -85,15 +87,38 @@ describe('server tests', () => {
 
   });
 
-  describe('POST', () => {
-      it('should return error if file is too big', done => {
-          fs.createReadStream('files/big.png')
-              .pipe(request.post('http://localhost:3000', (err, response, body) => {
-                  assert.equal(response.statusCode, 413);
-                  assert.equal(body, 'File is too big!');
+    describe('POST', () => {
+        it('should upload file', done => {
+            request.get('http://localhost:3000/index.js')
+                .pipe(request.post('http://localhost:3000/index2.js', (err, response, body) => {
+                    let sendedFile = fs.readFileSync('files/index.js');
+                    let receivedFile = fs.readFileSync('files/index2.js');
 
-                  done();
-              }));
-      });
+                    assert.equal(body, 'OK');
+                    assert.equal(response.statusCode, 200);
+                    assert.equal(sendedFile.toString(), receivedFile.toString());
+
+                    done();
+            }));
+
+            after(done => {
+                fs.unlink('files/index2.js', err => {
+                    if (!err) {
+                        done();
+                    }
+                });
+            });
+        });
+
+        it('should return error if file is too big', done => {
+            request.get('http://localhost:3000/big.png')
+                .pipe(request.post('http://localhost:3000/big.png', (err, response, body) => {
+                    // assert.equal(err, 'ddd');
+                    assert.equal(response.statusCode, 413);
+                    assert.equal(body, 'File is too big!');
+
+                    done();
+                }));
+        });
   })
 });
