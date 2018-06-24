@@ -110,6 +110,16 @@ describe('server tests', () => {
             });
         });
 
+        it('if file already exists returns error 409', done => {
+           request.get('http://localhost:3000/index.js')
+               .pipe(request.post('http://localhost:3000/index.js', (err, response, body) => {
+                   assert.equal(response.statusCode, 409);
+                   assert.equal(response.body, 'File exists');
+
+                   done();
+               }));
+        });
+
         it('should return error if file is too big', done => {
             request.get('http://localhost:3000/big.png')
                 .on('response', function(response) {
