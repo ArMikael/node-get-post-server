@@ -53,14 +53,14 @@ describe('server tests', () => {
         });
     });
 
-  it('should return error if file doesn\'t exist', done => {
-      request('http://localhost:3000/index.html', (err, response, body) => {
-          assert.equal(response.statusCode, 404);
-          assert.equal(body, 'Not found');
+    it('should return error if file doesn\'t exist', done => {
+        request('http://localhost:3000/index.html', (err, response, body) => {
+            assert.equal(response.statusCode, 404);
+            assert.equal(body, 'Not found');
 
-          done();
-      });
-  });
+            done();
+        });
+    });
 
     it('should return error if the path has nested subfolders', done => {
         request('http://localhost:3000/files/subfolder/index.js', (err, response, body) => {
@@ -120,27 +120,48 @@ describe('server tests', () => {
                }));
         });
 
-        it('should return error if file is too big', done => {
-            request.get('http://localhost:3000/big.png')
-                .on('response', function(response) {
-                    console.log(response.statusCode); // 200
-                })
-                .pipe(request.post('http://localhost:3000/big2.png', (err, response, body) => {
-                    // console.log(response);
-                    assert.equal(response.statusCode, 413);
-                    assert.equal(body, 'File is too big!');
+        // it('should return error if file is too big', done => {
+        //     request.get('http://localhost:3000/big.png')
+        //         .on('response', function(response) {
+        //             console.log(response.statusCode); // 200
+        //         })
+        //         .pipe(request.post('http://localhost:3000/big2.png', (err, response, body) => {
+        //             // console.log(response);
+        //             assert.equal(response.statusCode, 413);
+        //             assert.equal(body, 'File is too big!');
+        //
+        //             done();
+        //         }));
+        //
+        //
+        //     after(done => {
+        //         fs.unlink('files/big2.png', err => {
+        //             if (!err) {
+        //                 done();
+        //             }
+        //         });
+        //     });
+        // });
+    });
 
-                    done();
-                }));
-
-
-            after(done => {
-                fs.unlink('files/big2.png', err => {
+    describe('DELETE', () => {
+        before(done => {
+            request.get('http://localhost:3000/index.js')
+                .pipe(request.post('http://localhost:3000/index2.js', err => {
                     if (!err) {
                         done();
                     }
-                });
+            }));
+        });
+
+        it('should remove file', done => {
+            request.delete('http://localhost:3000/index2.js', (err, response, body) => {
+                console.log('err', err);
+                console.log('body', body);
+                console.log('response.statusCode', response.statusCode);
+
+                done();
             });
         });
-  })
+    });
 });
