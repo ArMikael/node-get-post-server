@@ -45,9 +45,11 @@ describe('server tests', () => {
      */
 
     it('should return requested file if the path is correct', done => {
+      // файл должен быть скопирован до запуска тестов автоматически
+      // (before|beforeEach|after|afterEach)
         request('http://localhost:3000/index.js', (err, response, body) => {
             assert.equal(response.statusCode, 200);
-            assert.equal(body, 'console.log(\'hello world\');');
+            assert.equal(body, 'console.log(\'hello world\');\n');
 
             done();
         });
@@ -89,7 +91,17 @@ describe('server tests', () => {
 
     describe('POST', () => {
         it('should upload file', done => {
-            request.get('http://localhost:3000/index.js')
+          /*
+            1. Streams
+              request.get|.post - .pipe
+            2. request.post({
+                 uri: http://localhost:3000/file.txt,
+                 body: fs.createReadStream()|fs.readFileSync()
+               }, (err, response, body) => {})
+          */
+
+            // request.get('http://localhost:3000/index.js')
+            fs.createReadStream('files/index.js')
                 .pipe(request.post('http://localhost:3000/index2.js', (err, response, body) => {
                     let sendedFile = fs.readFileSync('files/index.js');
                     let receivedFile = fs.readFileSync('files/index2.js');
@@ -101,17 +113,12 @@ describe('server tests', () => {
                     done();
             }));
 
-            after(done => {
-                fs.unlink('files/index2.js', err => {
-                    if (!err) {
-                        done();
-                    }
-                });
-            });
+            after(done => fs.unlink('files/index2.js', done));
         });
 
         it('if file already exists returns error 409', done => {
-           request.get('http://localhost:3000/index.js')
+           // request.get('http://localhost:3000/index.js')
+           fs.createReadStream('files/index.js')
                .pipe(request.post('http://localhost:3000/index.js', (err, response, body) => {
                    assert.equal(response.statusCode, 409);
                    assert.equal(response.body, 'File exists');
@@ -120,47 +127,39 @@ describe('server tests', () => {
                }));
         });
 
-        // it('should return error if file is too big', done => {
-        //     request.get('http://localhost:3000/big.png')
-        //         .on('response', function(response) {
-        //             console.log(response.statusCode); // 200
-        //         })
-        //         .pipe(request.post('http://localhost:3000/big2.png', (err, response, body) => {
-        //             // console.log(response);
-        //             assert.equal(response.statusCode, 413);
-        //             assert.equal(body, 'File is too big!');
-        //
-        //             done();
-        //         }));
-        //
-        //
-        //     after(done => {
-        //         fs.unlink('files/big2.png', err => {
-        //             if (!err) {
-        //                 done();
-        //             }
-        //         });
-        //     });
-        // });
+        it('should return error if file is too big', done => {
+            // request.get('http://localhost:3000/big.png')
+            //     .on('response', function(response) {
+            //         console.log(response.statusCode); // 200
+            //     })
+            fs.createReadStream('files/big.png')
+                .pipe(request.post('http://localhost:3000/big2.png', (err, response, body) => {
+                    // console.log(response);
+                    assert.equal(response.statusCode, 413);
+                    assert.equal(body, 'File is too big!');
+                    try {
+                      fs.statSync('files/big2.png');
+                    } catch (err) {
+                      assert.equal(err.code, 'ENOENT');
+                      return done();
+                    }
+                    assert.fail('File exists');
+                }));
+
+
+            // after(done => {
+            //     fs.unlink('files/big2.png', done);
+            // });
+        });
     });
 
     describe('DELETE', () => {
-        // before(done => {
-        //     // request.get('http://localhost:3000/index.js')
-        //     //     .pipe(request.post('http://localhost:3000/index2.js', err => {
-        //     //         if (!err) {
-        //     //             done();
-        //     //         }
-        //     // }));
-        //
-        //     const file = fs.readFileSync('files/index.js', {encoding: 'utf-8'});
-        //     console.log(file.toString());
-        //
-        //     fs.writeFileSync('files/index2.js', file, (res) => {
-        //         console.log(res);
-        //         done();
-        //     });
-        // });
+        before(() => {
+            const file = fs.readFileSync('files/index.js', {encoding: 'utf-8'});
+            console.log(file.toString());
+
+            fs.writeFileSync('files/index2.js', file);
+        });
 
         it('should remove file', done => {
             request.delete('http://localhost:3000/index.js', (err, response, body) => {
