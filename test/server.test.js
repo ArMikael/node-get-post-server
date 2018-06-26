@@ -124,17 +124,12 @@ describe('server tests', () => {
                    assert.equal(response.body, 'File exists');
 
                    done();
-               }));
+           }));
         });
 
         it('should return error if file is too big', done => {
-            // request.get('http://localhost:3000/big.png')
-            //     .on('response', function(response) {
-            //         console.log(response.statusCode); // 200
-            //     })
             fs.createReadStream('files/big.png')
                 .pipe(request.post('http://localhost:3000/big2.png', (err, response, body) => {
-                    // console.log(response);
                     assert.equal(response.statusCode, 413);
                     assert.equal(body, 'File is too big!');
                     try {
@@ -156,7 +151,6 @@ describe('server tests', () => {
     describe('DELETE', () => {
         before(() => {
             const file = fs.readFileSync('files/index.js', {encoding: 'utf-8'});
-            console.log(file.toString());
 
             fs.writeFileSync('files/index2.js', file);
         });
@@ -171,7 +165,6 @@ describe('server tests', () => {
         });
 
 
-
         it('should return error if file doesn\'t exist', done => {
             request.delete('http://localhost:3000/index3.js', (err, response, body) => {
                 assert.equal(response.statusCode, 404);
@@ -179,7 +172,5 @@ describe('server tests', () => {
                 done();
             });
         });
-
-
     });
 });
