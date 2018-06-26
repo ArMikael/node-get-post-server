@@ -49,7 +49,7 @@ describe('server tests', () => {
       // (before|beforeEach|after|afterEach)
         request('http://localhost:3000/index.js', (err, response, body) => {
             assert.equal(response.statusCode, 200);
-            assert.equal(body, 'console.log(\'hello world\');\n');
+            assert.equal(body, 'console.log(\'hello world\');');
 
             done();
         });
@@ -169,7 +169,14 @@ describe('server tests', () => {
             request.delete('http://localhost:3000/index3.js', (err, response, body) => {
                 assert.equal(response.statusCode, 404);
 
-                done();
+                try {
+                    fs.statSync('files/index3.js');
+                } catch (err) {
+                    assert.equal(err.code, 'ENOENT');
+                    return done();
+                }
+
+                assert.fail('File exists');
             });
         });
     });
