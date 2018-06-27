@@ -15,7 +15,7 @@ describe('async server tests', () => {
   });
 
   describe('GET', () => {
-    it.only('should return index.html', async () => {
+    it('should return index.html', async () => {
       /*
         1. launch server
         2. request GET /
@@ -43,47 +43,39 @@ describe('async server tests', () => {
       4. if there is some issues with reading the file return error
      */
 
-    it('should return requested file if the path is correct', async (done) => {
+    it('should return requested file if the path is correct', async () => {
       // файл должен быть скопирован до запуска тестов автоматически
       // (before|beforeEach|after|afterEach)
-        await request('http://localhost:3000/index.js', (err, response, body) => {
-            assert.equal(response.statusCode, 200);
-            assert.equal(body, 'console.log(\'hello world\');');
+        let response = await request('http://localhost:3000/index.js');
 
-            done();
-        });
+        assert.equal(response.statusCode, 200);
+        assert.equal(response.body, 'console.log(\'hello world\');');
     });
 
-    it('should return error if file doesn\'t exist', async (done) => {
-        await request('http://localhost:3000/index.html', (err, response, body) => {
-            assert.equal(response.statusCode, 404);
-            assert.equal(body, 'Not found');
+    it('should return error if file doesn\'t exist', async () => {
+        let response = await request('http://localhost:3000/index.html');
 
-            done();
-        });
+        assert.equal(response.statusCode, 404);
+        assert.equal(response.body, 'Not found');
     });
 
-    it('should return error if the path has nested subfolders', async (done) => {
-        await request('http://localhost:3000/files/subfolder/index.js', (err, response, body) => {
-            if (err) return done(err);
+    it('should return error if the path has nested subfolders', async () => {
+        let response = await request('http://localhost:3000/files/subfolder/index.js');
 
-            assert.equal(response.statusCode, 400);
-            assert.equal(body, 'Nested paths are not allowed');
+        if (response.err) return done(err);
 
-            done();
-        });
+        assert.equal(response.statusCode, 400);
+        assert.equal(response.body, 'Nested paths are not allowed');
     });
 
 
-    it('should return error if the path has ".." symbols', done => {
-        request('http://localhost:3000/../files/index.js', (err, response, body) => {
-            if (err) return done(err);
+    it.only('should return error if the path has ".." symbols', async () => {
+        let response = await request('http://localhost:3000/../files/index.js');
 
-            assert.equal(response.statusCode, 400);
-            assert.equal(body, 'Nested paths are not allowed');
+        if (response.err) return done(response.err);
 
-            done();
-        });
+        assert.equal(response.statusCode, 400);
+        assert.equal(response.body, 'Nested paths are not allowed');
     });
 
   });
